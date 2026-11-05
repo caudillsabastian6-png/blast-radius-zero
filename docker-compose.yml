@@ -1,0 +1,39 @@
+# Blast Radius Zero - deployment shape (Vultr Cloud Compute + Docker).
+#
+#   docker compose --profile build build   # build agent + worker images
+#   docker compose up -d agent             # run the agent
+#
+# The worker image has no long-running service: the agent launches one
+# hardened, disposable container from it per task run.
+services:
+  agent:
+    # Build context is the repo root so agent/Dockerfile can bake in the
+    # demo sample tasks alongside the agent code (see agent/Dockerfile).
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    image: brz-agent:latest
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      BRZ_SANDBOX: docker
+      BRZ_WORKER_IMAGE: brz-worker:latest
+      BRZ_RUNS_DIR: /srv/runs
+    volumes:
+      # Control plane only: lets the agent launch sandbox containers.
+      # The sandbox containers themselves never see this socket
+      # (the worker's probe verifies and reports its absence).
+      - /var/run/docker.sock:/var/run/docker.sock
+      - brz-runs:/srv/runs
+    restart: unless-stopped
+
+  worker:
+    build: ./worker
+    image: brz-worker:latest
+    profiles: ["build"]   # build-only; never run as a service
+    entrypoint: ["true"]
+
+volumes:
+  brz-runs:

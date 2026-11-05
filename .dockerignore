@@ -1,0 +1,4 @@
+# Keep secrets and VCS data out of every build context.
+.env
+.git
+**/__pycache__

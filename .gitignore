@@ -1,5 +1,19 @@
+# Secrets - never commit
 .env
 *.key
+*.pem
+
+# Run records (may contain task text and outputs)
+runs/
+
+# Python
 __pycache__/
-node_modules/
-sandbox-data/
+*.py[cod]
+
+# Local sandbox workspaces
+brz-sandbox-*/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
